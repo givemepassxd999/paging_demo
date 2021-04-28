@@ -27,7 +27,7 @@ class GitHubViewModel(private val repository: GitHubRepository) : ViewModel() {
                 }
                 searchResult.value = list
             }, {
-
+                loading.value = false
             })
     }
 

@@ -22,23 +22,34 @@ class MainActivity : AppCompatActivity() {
         recycler_view.adapter = adapter
         gitHubViewModel.run {
             loading.observe(this@MainActivity, Observer {
-                if (it) {
+                if (swipe_refresh.isRefreshing.not().and(it)) {
                     progress_bar.visibility = View.VISIBLE
                 } else {
                     progress_bar.visibility = View.GONE
                 }
             })
             getSearchResult().observe(this@MainActivity, Observer {
+                if (swipe_refresh.isRefreshing) {
+                    swipe_refresh.isRefreshing = false
+                }
                 adapter.setData(it)
             })
         }
         search_btn.setOnClickListener {
-            val inputStr = search_input.text.toString()
-            if (inputStr.isNotEmpty()) {
-                gitHubViewModel.searchUsers(inputStr, 0, 50)
-            } else {
-                Toast.makeText(this@MainActivity, "請輸入搜尋文字...", Toast.LENGTH_SHORT).show()
-            }
+            refreshData()
+        }
+        swipe_refresh.setOnRefreshListener {
+            refreshData()
+        }
+    }
+
+    private fun refreshData() {
+        val inputStr = search_input.text.toString()
+        if (inputStr.isNotEmpty()) {
+            adapter.setData(arrayListOf())
+            gitHubViewModel.searchUsers(inputStr, 0, 50)
+        } else {
+            Toast.makeText(this@MainActivity, "請輸入搜尋文字...", Toast.LENGTH_SHORT).show()
         }
     }
 }
