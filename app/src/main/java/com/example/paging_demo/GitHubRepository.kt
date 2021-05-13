@@ -1,12 +1,25 @@
 package com.example.paging_demo
 
-import io.reactivex.Single
+import androidx.lifecycle.LiveData
+import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagedList
+import java.util.concurrent.Executors
 
 class GitHubRepository {
 
-    private val apiService = AppClientManager.retrofit.create(GithubApi::class.java)
+    fun searchUsers(
+        query: String = "google",
+        pageSize: Int = 10
+    ): LiveData<PagedList<Item>> {
+        val factory = GithubDataSourceFactory(query)
+        val config = PagedList.Config.Builder()
+            .setEnablePlaceholders(false)
+            .setInitialLoadSizeHint(pageSize * 2)
+            .setPageSize(pageSize)
+            .build()
 
-    fun searchUsers(query: String = "google", page: Int = 0, count: Int = 10): Single<UsersSearchResponse> {
-        return apiService.searchUsers(query, page, count)
+        return LivePagedListBuilder(factory, config)
+            .setFetchExecutor(Executors.newFixedThreadPool(5))
+            .build()
     }
 }

@@ -1,6 +1,7 @@
 package com.example.paging_demo
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.android.parcel.Parcelize
 
 class UsersSearchResponse {
     @SerializedName("total_count")

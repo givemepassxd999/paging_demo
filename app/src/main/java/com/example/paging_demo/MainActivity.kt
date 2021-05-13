@@ -1,12 +1,11 @@
 package com.example.paging_demo
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import kotlinx.android.synthetic.main.activity_main.*
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : AppCompatActivity() {
@@ -20,25 +19,12 @@ class MainActivity : AppCompatActivity() {
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         recycler_view.layoutManager = layoutManager
         recycler_view.adapter = adapter
-        gitHubViewModel.run {
-            loading.observe(this@MainActivity, Observer {
-                if (swipe_refresh.isRefreshing.not().and(it)) {
-                    progress_bar.visibility = View.VISIBLE
-                } else {
-                    progress_bar.visibility = View.GONE
-                }
-            })
-            getSearchResult().observe(this@MainActivity, Observer {
-                if (swipe_refresh.isRefreshing) {
-                    swipe_refresh.isRefreshing = false
-                }
-                adapter.setData(it)
+        with(gitHubViewModel) {
+            items.observe(this@MainActivity, Observer {
+                adapter.submitList(it)
             })
         }
         search_btn.setOnClickListener {
-            refreshData()
-        }
-        swipe_refresh.setOnRefreshListener {
             refreshData()
         }
     }
@@ -46,8 +32,7 @@ class MainActivity : AppCompatActivity() {
     private fun refreshData() {
         val inputStr = search_input.text.toString()
         if (inputStr.isNotEmpty()) {
-            adapter.setData(arrayListOf())
-            gitHubViewModel.searchUsers(inputStr, 0, 50)
+            gitHubViewModel.searchUsers(inputStr)
         } else {
             Toast.makeText(this@MainActivity, "請輸入搜尋文字...", Toast.LENGTH_SHORT).show()
         }
